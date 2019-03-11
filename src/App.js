@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
-import QuoteContainer from "./QuoteContainer";
 import styled from 'styled-components';
+import NewComponent from "./newComponent"
+import QuoteContainer from "./QuoteContainer";
+import CSSTransition from "react-transition-group/CSSTransition";
 
 
 class App extends Component {
@@ -21,7 +23,8 @@ class App extends Component {
     }
     return color
   }
-  setRandomColor(){
+
+  setRandomColor() {
     this.setState({backgroundColor: this.randomColor()})
   }
 
@@ -39,11 +42,15 @@ class App extends Component {
 `;
     return (
       <div className="App">
-        <StyledDiv>
-          <QuoteContainer
-            color={this.state.backgroundColor}
-            setRandomColor={this.setRandomColor.bind(this)}/>
-        </StyledDiv>
+        <CSSTransition
+          timeout={500}
+        >
+          <StyledDiv>
+            <QuoteContainer
+              color={this.state.backgroundColor}
+              setRandomColor={this.setRandomColor.bind(this)}/>
+          </StyledDiv>
+        </CSSTransition>
       </div>
     );
   }

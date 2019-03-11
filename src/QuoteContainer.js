@@ -1,13 +1,8 @@
 import React from "react";
 import styled from 'styled-components';
+import services from "./services.js"
+import AuthorWithPopover from "./authorWithPopover";
 
-
-const QUOTE = [{text: "Don't cry because it's over, smile because it happened.", author: "Dr. Seuss"},
-  {
-    text: "I'm selfish, impatient and a little insecure. I make mistakes, I am out of control and at times hard to handle. But if you can't handle me at my worst, then you sure as hell don't deserve me at my best",
-    author: "Marilyn Monroe"
-  }
-];
 
 class QuoteContainer extends React.Component {
   constructor(props) {
@@ -15,19 +10,43 @@ class QuoteContainer extends React.Component {
     this.state = {
       currentQuote: {},
       backgroundColor: "",
-    }
+      arrOfQuotes: [],
+      anchorEl: null,
+    };
   }
 
   componentDidMount() {
-    const currentQuote = QUOTE[Math.floor(Math.random() * 2)];
-    this.setState({currentQuote})
+
+    services.getQuotes()
+      .then((result) => result.json())
+      .then((jsonResult) => {
+        const currentQuote = jsonResult.quotes[Math.floor(Math.random() * jsonResult.quotes.length + 1)];
+        this.setState({currentQuote, arrOfQuotes: jsonResult.quotes});
+      });
   }
 
   nextQuote() {
-    const currentQuote = QUOTE[Math.floor(Math.random() * 2)];
+    const currentQuote = this.state.arrOfQuotes[Math.floor(Math.random() * this.state.arrOfQuotes.length + 1)];
     this.setState({currentQuote});
     this.props.setRandomColor()
   }
+
+  handleClick = event => {
+    this.setState({
+      anchorEl: event.currentTarget,
+    });
+  };
+
+  handleClose = () => {
+    this.setState({
+      anchorEl: null,
+    });
+  };
+  getWikiLink = () => {
+    const link = this.state.currentQuote.author
+      && `https://wikipedia.org/wiki/${this.state.currentQuote.author.split(" ").join("_")}`
+    window.open(link)
+  };
 
   render() {
     const StyledQuoteWrapper = styled.div`
@@ -49,12 +68,6 @@ class QuoteContainer extends React.Component {
     border-radius: 5px;
     
 `;
-    const StyledAuthor = styled.div`
-      text-align: right;
-      font-family: 'Raleway', sans-serif;
-      font-weight: 400;
-      margin: 10px;
-    `;
     const StyledButtonWrapper = styled.div`
       display: flex;
       align-items: center;
@@ -74,16 +87,19 @@ class QuoteContainer extends React.Component {
     padding-left: 50px;
     padding-right: 50px;
     `;
-    return <StyledQuoteWrapper>
-      <div>
-        <StyledQuote>
-          {this.state.currentQuote.text}
-        </StyledQuote>
-        <StyledAuthor>
-          -{this.state.currentQuote.author}
-        </StyledAuthor>
 
-      </div>
+
+
+    return <StyledQuoteWrapper>
+      {this.state.currentQuote && <div>
+        <StyledQuote>
+          {this.state.currentQuote.quote}
+        </StyledQuote>
+        <AuthorWithPopover
+          author = {this.state.currentQuote.author}
+          getWikiLink = {this.getWikiLink.bind(this)}
+        />
+      </div>}
       <StyledButtonWrapper>
         <StyledButton onClick={this.nextQuote.bind(this)}>New quote</StyledButton>
       </StyledButtonWrapper>
